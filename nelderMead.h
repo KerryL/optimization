@@ -116,7 +116,7 @@ private:
 #include <numeric>
 
 // Local headers
-#include "utilities.h"
+#include "zip.h"
 
 //==========================================================================
 // Class:			NelderMead
