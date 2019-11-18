@@ -10,7 +10,7 @@ This collection of classes are used in several of my projects, so I decided to b
 There are several guides online for using git submodules.  Here is my summary of the most useful git commands.\
 - To add utilities to your project as a submodule:
 ```
-$ cd <root directory of your superproject>\
+$ cd <root directory of your superproject>
 $ git submodule add https://github.com/KerryL/optimization.git
 ```
 
@@ -21,9 +21,9 @@ $ git submodule add https://github.com/KerryL/optimization.git <desired path>/op
 
 - Cloning a repository using a submodule now requires a couple of extra steps:
 ```
-$ git clone ...\
-$ cd <project directory created by above clone command>\
-$ git submodule init\
+$ git clone ...
+$ cd <project directory created by above clone command>
+$ git submodule init
 $ git submodule update
 ```
 
