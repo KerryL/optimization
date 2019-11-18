@@ -18,9 +18,9 @@ template <int paramCount>
 class NelderMead : public Optimizer
 {
 public:
-	NelderMead(ObjectiveFunction objectiveFunction, const unsigned int& iterationLimit);
+	NelderMead(ObjectiveFunction objectiveFunction, const unsigned int& iterationLimit, const AdditionalArgs* args);
 
-	virtual ~NelderMead() {}
+	virtual ~NelderMead() = default;
 
 	// Initialization parameters
 	void SetSimplexInitializerDelta(const double& delta) { simplexDelta = delta; }
@@ -127,6 +127,7 @@ private:
 // Input Arguments:
 //		objectiveFunction	= ObjectiveFunction
 //		iterationLimit		= const unsigned int&
+//		args				= const AdditionalArgs*
 //
 // Output Arguments:
 //		None
@@ -137,8 +138,8 @@ private:
 //==========================================================================
 template <int paramCount>
 NelderMead<paramCount>::NelderMead(ObjectiveFunction objectiveFunction,
-	const unsigned int& iterationLimit)
-	: Optimizer(objectiveFunction, iterationLimit)
+	const unsigned int& iterationLimit, const AdditionalArgs* args)
+	: Optimizer(objectiveFunction, iterationLimit, args)
 {
 	simplexDelta = 0.05;
 	simplexDeltaNearZero = 0.00025;
@@ -299,7 +300,7 @@ bool NelderMead<paramCount>::StableEvaluate(const PointVec& centroid,
 	for (unsigned int i = 0; i < iterationLimit; ++i)
 	{
 		point = (1.0 + factor) * centroid - factor * worst;
-		value = objectiveFunction(point);
+		value = objectiveFunction(point, args).norm();
 		if (std::isfinite(value))
 			return true;
 
@@ -333,7 +334,7 @@ void NelderMead<paramCount>::Initialize(SimplexMat& simplex, ValueVec& functionV
 	ConditionalResize::ResizeValue(functionValue, guess.size());
 
 	simplex.col(0) = guess;
-	functionValue(0) = objectiveFunction(guess);
+	functionValue(0) = objectiveFunction(guess, args).norm();
 
 	int i;
 	for (i = 1; i < simplex.cols(); i++)
@@ -344,7 +345,7 @@ void NelderMead<paramCount>::Initialize(SimplexMat& simplex, ValueVec& functionV
 		else
 			simplex(i - 1, i) *= (1.0 + simplexDelta);
 
-		functionValue(i) = objectiveFunction(simplex.col(i));
+		functionValue(i) = objectiveFunction(simplex.col(i), args).norm();
 	}
 
 	SortByFunctionValue(simplex, functionValue);
@@ -476,7 +477,7 @@ void NelderMead<paramCount>::Shrink(SimplexMat& simplex, ValueVec& functionValue
 	for (i = 1; i < simplex.cols(); i++)
 	{
 		simplex.col(i) = simplex.col(0) + shrinkFactor * (simplex.col(i) - simplex.col(0));
-		functionValue(i) = objectiveFunction(simplex.col(i));
+		functionValue(i) = objectiveFunction(simplex.col(i), args).norm();
 	}
 }
 
