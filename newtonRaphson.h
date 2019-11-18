@@ -59,6 +59,21 @@ private:
 	GuessUpdateFunction guessUpdateFunc = &DefaultGuessUpdateFunction;
 
 	bool AdjustStepIfDeltaIsLarge(PointVec& delta, double& lastDeltaLength) const;
+
+	struct DynamicResize
+	{
+		static void Resize(PointVec& v, const int& trueParamCount);
+		static void Resize(Eigen::Matrix<double, trueParamCount, trueParamCount>& m, const int& trueParamCount);
+	};
+
+	struct FixedResize
+	{
+		static void Resize(PointVec& /*v*/, const int& /*trueParamCount*/) {}
+		static void Resize(Eigen::Matrix<double, trueParamCount, trueParamCount>& /*m*/, const int& /*trueParamCount*/) {}
+	};
+
+	typedef typename std::conditional<paramCount == Eigen::Dynamic,
+		DynamicResize, FixedResize>::type ConditionalResize;
 };
 
 //==========================================================================
@@ -124,9 +139,11 @@ Eigen::VectorXd NewtonRaphson<paramCount, trueParamCount>::Optimize() const
 			break;
 
 		Eigen::Matrix<double, trueParamCount, trueParamCount> jacobian;
+		ConditionalResize::Resize(jacobian, guess.size());
 		for (int j = 0; j < jacobian.rows(); ++j)
 		{
 			PointVec tempDelta;
+			ConditionalResize::Resize(tempDelta, guess.size());
 			tempDelta.setZero();
 			tempDelta(j) = epsilon;
 			const auto tempGuess(guessUpdateFunc(guess, tempDelta));
@@ -158,6 +175,54 @@ bool NewtonRaphson<paramCount, trueParamCount>::AdjustStepIfDeltaIsLarge(PointVe
 	}
 
 	return true;
+}
+
+//==========================================================================
+// Class:			NewtonRaphson::DynamicResize
+// Function:		Resize
+//
+// Description:		Resizes the vector to the specified size.
+//
+// Input Arguments:
+//		v				= PointVec&
+//		trueParamCount	= const int&
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+template <int paramCount, int trueParamCount>
+void NewtonRaphson<paramCount, trueParamCount>::DynamicResize::Resize(PointVec& v,
+	const int& trueParamCount)
+{
+	v.resize(trueParamCount);
+}
+
+//==========================================================================
+// Class:			NewtonRaphson::DynamicResize
+// Function:		Resize
+//
+// Description:		Resizes the vector to the specified size.
+//
+// Input Arguments:
+//		m				= Eigen::Matrix<double, trueParamCount, trueParamCount>&
+//		trueParamCount	= const int&
+//
+// Output Arguments:
+//		None
+//
+// Return Value:
+//		None
+//
+//==========================================================================
+template <int paramCount, int trueParamCount>
+void NewtonRaphson<paramCount, trueParamCount>::DynamicResize::Resize(Eigen::Matrix<double, trueParamCount, trueParamCount>& m,
+	const int& trueParamCount)
+{
+	m.resize(trueParamCount, trueParamCount);
 }
 
 #endif// NEWTON_RAPHSON_H_
