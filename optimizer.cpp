@@ -24,7 +24,7 @@
 //
 //==========================================================================
 Optimizer::Optimizer(ObjectiveFunction objectiveFunction,
-	const unsigned int& iterationLimit) : objectiveFunction(objectiveFunction),
-	iterationLimit(iterationLimit)
+	const unsigned int& iterationLimit, const AdditionalArgs* args) : objectiveFunction(objectiveFunction),
+	iterationLimit(iterationLimit), args(args)
 {
 }

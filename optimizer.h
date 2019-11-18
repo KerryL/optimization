@@ -15,15 +15,21 @@
 class Optimizer
 {
 public:
-	typedef std::function<double(const Eigen::VectorXd&)> ObjectiveFunction;
-	Optimizer(ObjectiveFunction objectiveFunction, const unsigned int& iterationLimit);
-	virtual ~Optimizer() {}
+	struct AdditionalArgs
+	{
+		virtual ~AdditionalArgs() = default;
+	};
+
+	typedef std::function<Eigen::VectorXd(const Eigen::VectorXd&, const AdditionalArgs*)> ObjectiveFunction;
+	Optimizer(ObjectiveFunction objectiveFunction, const unsigned int& iterationLimit, const AdditionalArgs* args = nullptr);
+	virtual ~Optimizer() = default;
 
 	virtual Eigen::VectorXd Optimize() const = 0;
 
 protected:
 	const ObjectiveFunction objectiveFunction;
 	const unsigned int& iterationLimit;
+	const AdditionalArgs* args;
 };
 
 #endif// OPTIMIZER_H_
